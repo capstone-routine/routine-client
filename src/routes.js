@@ -30,7 +30,7 @@ const routes = () => {
                     <Route path="/typetest/result5" element={<TestResult5 />} />
                     <Route path="/typetest/result6" element={<TestResult6 />} />
                     <Route path="/routine" element={<Routine />} />
-                    <Route path="/Purpose" element={<Purpose />} />
+                    <Route path="/purpose" element={<Purpose />} />
                     <Route path="/mypage" element={<MyPage />} />
                     <Route path="/signin" element={<SignIn />} />
                     <Route path="/signup" element={<SignUp />} />
