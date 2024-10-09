@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 // 시작할 때 결과 리셋 시켜야함!!!
 
-function TestDetail() {
+function TypeTest() {
     const navigate = useNavigate(); 
     const [answers, setAnswers] = useState([]);
     const questions = [
@@ -44,7 +44,7 @@ function TestDetail() {
     );
 };
 
-export default TestDetail;
+export default TypeTest;
 
 const Wrap = styled.div`
     width: 100%;

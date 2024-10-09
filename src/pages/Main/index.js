@@ -6,7 +6,7 @@ import { primaryColor, secondaryColor, textColor } from '../../styles/colors'; /
 import backgroundImage from "../../assets/img/mainBackground.png";
 
 function Main() {
-    const { goToTestDetail } = useNavigation();
+    const { goToTypeTest } = useNavigation();
 
     return (
         <>
@@ -20,7 +20,7 @@ function Main() {
                     <Description>
                         효과적인 일정 관리의 시작, 나의 적성 파악하기!
                     </Description>
-                    <StartButton onClick={goToTestDetail}>Test 시작하기</StartButton>
+                    <StartButton onClick={goToTypeTest}>Test 시작하기</StartButton>
                 </Wrap>
             </Intro>
         </>

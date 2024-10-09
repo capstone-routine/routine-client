@@ -12,7 +12,7 @@ function Header() {
         "/": { name: "home", action: navigation.goToHome },
         "/purpose": { name: "prupose", action: navigation.goToPurpose },
         "/routine": { name: "routine", action: navigation.goToRoutine },
-        "/typetest/detail": { name: "test", action: navigation.goToTestDetail },
+        "/typetest": { name: "test", action: navigation.goToTest },
         "/typetest/result": { name: "test", action: navigation.goToTestResult },
         "/mypage": { name: "mypage", action: navigation.goToMypage },
         "/signin": { name: "signin", action: navigation.goToSignIn },
@@ -51,7 +51,7 @@ function Header() {
                             유형검사
                             <SecondUl>
                                 <SecondLi
-                                    onClick={() => handleNavigation("/typetest/detail")}
+                                    onClick={() => handleNavigation("/typetest")}
                                 >
                                     Test
                                 </SecondLi>

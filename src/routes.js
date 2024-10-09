@@ -3,7 +3,7 @@ import MainLayout from "./components/Layout/MainLayout";
 import Main from "./pages/Main";
 import Purpose from "./pages/Purpose";
 import Routine from "./pages/Routine";
-import TestDetail from "./pages/TypeTest/TestDetail.js";
+import TypeTest from "./pages/TypeTest";
 import TestResult from "./pages/TypeTest/TestResult.js";
 import TestResult1 from "./pages/TypeTest/TestResult1.js";
 import TestResult2 from "./pages/TypeTest/TestResult2.js";
@@ -21,7 +21,7 @@ const routes = () => {
             <Routes>
                 <Route element={<MainLayout />}>
                     <Route path="/" element={<Main />} />
-                    <Route path="/typetest/detail" element={<TestDetail />} />
+                    <Route path="/typetest" element={<TypeTest />} />
                     <Route path="/typetest/result" element={<TestResult />} />
                     <Route path="/typetest/result1" element={<TestResult1 />} />
                     <Route path="/typetest/result2" element={<TestResult2 />} />
