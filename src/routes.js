@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "./components/Layout/MainLayout";
 import Main from "./pages/Main";
 import Routine from "./pages/Routine";
+import TypeDetail from "./pages/TypeDetail";
 import TypeTest from "./pages/TypeTest";
 import MyPage from "./pages/MyPage";
 import SignIn from "./pages/SignIn";
