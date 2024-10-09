@@ -3,7 +3,6 @@ import MainLayout from "./components/Layout/MainLayout";
 import Main from "./pages/Main";
 import Purpose from "./pages/Purpose";
 import Routine from "./pages/Routine";
-import TypeDetail from "./pages/TypeDetail";
 import TypeTest from "./pages/TypeTest";
 import TestResult from "./pages/TypeTest/TestResult.js";
 import TestResult1 from "./pages/TypeTest/TestResult1.js";
