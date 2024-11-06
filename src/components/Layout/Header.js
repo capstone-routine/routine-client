@@ -16,7 +16,6 @@ function Header() {
         "/typetest/result": { name: "test", action: navigation.goToTestResult },
         "/mypage": { name: "mypage", action: navigation.goToMypage },
         "/signin": { name: "signin", action: navigation.goToSignIn },
-        "/signup": { name: "signup", action: navigation.goToSignUp },
     };
 
     useEffect(() => {
@@ -92,9 +91,6 @@ function Header() {
                     <LoginIcon src={login} alt="login" />
                     <SignButton onClick={() => handleNavigation("/signin")}>
                         로그인
-                    </SignButton>
-                    <SignButton onClick={() => handleNavigation("/signup")}>
-                        회원가입
                     </SignButton>
                     {/* <SignButton>로그아웃</SignButton> */}
                 </ButtonWrap>
@@ -208,9 +204,10 @@ const ButtonWrap = styled.div`
 `;
 
 const LoginIcon = styled.img`
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
+    width: 30px;
+    height: 30px;
+    margin-right: -10px;
+    
 `;
 
 const SignButton = styled.button`
