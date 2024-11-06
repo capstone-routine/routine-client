@@ -1,5 +1,5 @@
-import React from "react";
-import { useForm, Controller } from "react-hook-form";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import styled, { keyframes, css } from "styled-components";
 import { textColor, secondaryColor, tertiaryColor } from "../../styles/colors";
@@ -7,69 +7,75 @@ import { textColor, secondaryColor, tertiaryColor } from "../../styles/colors";
 import { MdEmail } from "react-icons/md";
 import { FaKey } from "react-icons/fa";
 
-function SignIn() {
-    const {
-        handleSubmit,
-        control,
-        formState: { errors },
-    } = useForm();
+const SignIn = () => {
+    const [id, setId] = useState('');
+    const [pw, setPw] = useState('');
+    const navigate = useNavigate();
 
-    const onSubmit = (data) => {
-        console.log(data);
-    };
+    const loginSubmit = async () => {
+        if (id === '' || pw === '') {
+            alert('아이디 또는 비밀번호를 입력해주시기 바랍니다');
+            return
+        } else {
+            try {
+                const res = await fetch('/api/loginCheck', {
+                    method: 'POST',
+                    body: JSON.stringify({userID: id, userPW: pw}),
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                });
+                const data = await res.json();
+                
+                alert(data);
+                if (res.status === 200) {
+                    navigate('/main');
+                } else {
+                    setId('');
+                    setPw('');
+                    return;
+                }
+            } catch(err) {
+                console.log(err);
+            }
+        }
+    }
+
+    const moveSignUP = () => {
+        navigate('/signup');
+    }
 
     return (
+        <>
         <SignWrap>
             <BackTop></BackTop>
             <BackBottom>
-                <SignFormWrap onSubmit={handleSubmit(onSubmit)}>
+                <SignFormWrap>
                     <Title>로그인</Title>
                     <InputWrap>
                         <InputName>아이디</InputName>
-                        <InputBox $hasError={errors.id}>
+                        <InputBox>
                             <MdEmail color="#555" size={20} />
-                            <Controller
-                                as={Input}
-                                name="id"
-                                control={control}
-                                defaultValue=""
-                                rules={{ required: "아이디는 필수입니다." }}
-                                render={({ field }) => (
-                                    <Input
-                                        type="text"
-                                        placeholder="EXAMPLE"
-                                        {...field}
-                                    />
-                                )}
-                            />
+                            <Input type="text" placeholder="EXAMPLE" value={id} onChange={(e) => setId(e.target.value)} required/>
                         </InputBox>
                     </InputWrap>
                     <InputWrap>
                         <InputName>비밀번호</InputName>
-                        <InputBox $hasError={errors.password}>
+                        <InputBox>
                             <FaKey color="#555" size={20} />
-                            <Controller
-                                as={Input}
-                                name="password"
-                                control={control}
-                                defaultValue=""
-                                rules={{ required: "비밀번호는 필수입니다." }}
-                                render={({ field }) => (
-                                    <Input
-                                        type="password"
-                                        placeholder="PASSWORD"
-                                        {...field}
-                                    />
-                                )}
-                            />
+                            <Input type="password" placeholder="PASSWORD" value={pw} onChange={(e) => setPw(e.target.value)} required/>
                         </InputBox>
                     </InputWrap>
-                    <SubmitButton type="submit">로그인</SubmitButton>
+                    <SubmitButton type='submit' onClick={loginSubmit}>로그인</SubmitButton>
+                    <br/><br/>
+                    <SignupButton onClick={moveSignUP}>회원가입</SignupButton>
                 </SignFormWrap>
             </BackBottom>
         </SignWrap>
+        </>
     );
-}
+};
 
 export default SignIn;
 
@@ -179,4 +185,8 @@ const SubmitButton = styled.button`
     background-color: ${secondaryColor};
     border-radius: 10px;
     margin-top: 50px;
+`;
+const SignupButton = styled.button`
+    padding: 0 5px;
+    color: #424242;
 `;
