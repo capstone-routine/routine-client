@@ -5,35 +5,42 @@ import { textColor, secondaryColor, tertiaryColor } from "../../styles/colors";
 import { MdEmail } from "react-icons/md";
 import { FaKey } from "react-icons/fa";
 
+
+
 const SignUp = () => {
     const [id, setId] = useState('');
     const [pw, setPw] = useState('');
+    const [name, setName] = useState('');
     const navigate = useNavigate();
 
     const submitBtn = async () => {
-        if (id === '' || pw === '') {
-            alert("아이디 또는 비밀번호를 입력해주시기 바랍니다");
+        // 필수 입력값 확인
+        if (!id || !pw || !name) {
+            alert('아이디, 비밀번호 또는 이름을 입력해주시기 바랍니다.');
             return;
-        } else {
-            try {
-                const res = await fetch('/api/signup', {
-                    method: 'POST',
-                    body: JSON.stringify({ userID: id, userPW: pw }),
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                });
-                const data = await res.json();
+        }
 
-                alert(data);
-                if (res.status === 200) {
-                    navigate('/');
-                } else {
-                    setId('');
-                    setPw('');
-                }
-            } catch (err) {
-                console.log(err);
+        try {
+            const response = await fetch('http://localhost:3000/api/addUser', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userID: id, userPW: pw, userName: name }),
+            });
+
+            const result = await response.json();
+
+            if (response.status === 200) {
+                alert('회원가입 성공!');
+                setId('');
+                setPw('');
+                setName('');
+                navigate('/signIn'); // 회원가입 성공 후 로그인 페이지로 이동
+            } else {
+                alert('회원가입 실패: ' + result.message);
             }
+        } catch (error) {
+            console.error('회원가입 요청 중 오류:', error);
+            alert('서버와 통신 중 문제가 발생했습니다.');
         }
     };
 
@@ -43,9 +50,10 @@ const SignUp = () => {
             <BackBottom>
                 <SignFormWrap>
                     <Title>회원가입</Title>
+
                     <InputWrap>
                         <InputName>아이디</InputName>
-                        <InputBox $hasError={id === ''}>
+                        <InputBox $hasError={!id}>
                             <MdEmail color="#555" size={20} />
                             <Input
                                 type="text"
@@ -55,9 +63,10 @@ const SignUp = () => {
                             />
                         </InputBox>
                     </InputWrap>
+
                     <InputWrap>
                         <InputName>비밀번호</InputName>
-                        <InputBox $hasError={pw === ''}>
+                        <InputBox $hasError={!pw}>
                             <FaKey color="#555" size={20} />
                             <Input
                                 type="password"
@@ -67,7 +76,22 @@ const SignUp = () => {
                             />
                         </InputBox>
                     </InputWrap>
-                    <SubmitButton type="button" onClick={submitBtn}>회원가입</SubmitButton>
+
+                    <InputWrap>
+                        <InputName>이름</InputName>
+                        <InputBox $hasError={!name}>
+                            <Input
+                                type="text"
+                                placeholder="NAME"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                            />
+                        </InputBox>
+                    </InputWrap>
+
+                    <SubmitButton type="button" onClick={submitBtn}>
+                        회원가입
+                    </SubmitButton>
                 </SignFormWrap>
             </BackBottom>
         </SignWrap>

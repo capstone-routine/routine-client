@@ -12,35 +12,37 @@ const SignIn = () => {
     const [pw, setPw] = useState('');
     const navigate = useNavigate();
 
-    const loginSubmit = async () => {
-        if (id === '' || pw === '') {
-            alert('아이디 또는 비밀번호를 입력해주시기 바랍니다');
-            return
-        } else {
-            try {
-                const res = await fetch('/api/loginCheck', {
-                    method: 'POST',
-                    body: JSON.stringify({userID: id, userPW: pw}),
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                });
-                const data = await res.json();
-                
-                alert(data);
-                if (res.status === 200) {
-                    navigate('/main');
-                } else {
-                    setId('');
-                    setPw('');
-                    return;
-                }
-            } catch(err) {
-                console.log(err);
+    const loginSubmit = async (e) => {
+        e.preventDefault();
+    
+        try {
+            const response = await fetch('http://localhost:3000/api/Login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userID: id, userPW: pw }),
+            });
+    
+            if (!response.ok) {
+                const result = await response.json();
+                alert(result.message); // 오류 메시지 표시
+                setId('');
+                setPw('');
+                return;
             }
+    
+            const result = await response.json();
+            alert(result.message); // 로그인 성공 메시지
+            navigate('/'); // 메인 화면으로 이동
+        } catch (error) {
+            console.error('요청 중 오류 발생:', error);
+            alert('로그인 요청 중 문제가 발생했습니다.');
+            setId('');
+            setPw('');
         }
-    }
+    };
+    
 
     const moveSignUP = () => {
         navigate('/signup');

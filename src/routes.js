@@ -2,7 +2,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "./components/Layout/MainLayout";
 import Main from "./pages/Main";
 import Purpose from "./pages/Purpose";
+import PurposeInput from "./pages/Purpose/input.js";
 import Routine from "./pages/Routine";
+import Review from "./pages/Routine/review.js";
 import TypeTest from "./pages/TypeTest";
 import TestResult from "./pages/TypeTest/TestResult.js";
 import TestResult1 from "./pages/TypeTest/TestResult1.js";
@@ -17,7 +19,7 @@ import SignUp from "./pages/SignUp";
 
 const routes = () => {
     return (
-        <BrowserRouter>
+        <BrowserRouter basename={process.env.PUBLIC_URL}>
             <Routes>
                 <Route element={<MainLayout />}>
                     <Route path="/" element={<Main />} />
@@ -30,7 +32,9 @@ const routes = () => {
                     <Route path="/typetest/result5" element={<TestResult5 />} />
                     <Route path="/typetest/result6" element={<TestResult6 />} />
                     <Route path="/routine" element={<Routine />} />
+                    <Route path="/routine/review" element={<Review />} />
                     <Route path="/purpose" element={<Purpose />} />
+                    <Route path="/purpose/input" element={<PurposeInput />} />
                     <Route path="/mypage" element={<MyPage />} />
                     <Route path="/signin" element={<SignIn />} />
                     <Route path="/signup" element={<SignUp />} />
