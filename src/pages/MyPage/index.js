@@ -11,12 +11,15 @@ import emotionalImage from '../../assets/img/Emotional.png';
 import goalOrientedImage from '../../assets/img/GoalOriented.png';
 
 function MyPage() {
+  const API_URL = process.env.REACT_APP_API_URL;
+
   const [userData, setUserData] = useState({ name: "", type: "" });
   const [reviews, setReviews] = useState([]);
-  const [error, setError] = useState(null); // 에러 상태 추가
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // 타입별 경로 매핑
+  // Mapping for type-specific paths and images
   const typePageMap = {
     "Balanced Type": "/typetest/result1",
     "Perfectionist": "/typetest/result2",
@@ -35,86 +38,77 @@ function MyPage() {
     "Goal-Oriented Type": goalOrientedImage,
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      await fetchUserData();
-      await fetchReviews();
-    };
-
-    fetchData();
-  }, []);
-
-  const fetchUserData = async () => {
+  // Fetch session data
+  const fetchSessionData = async () => {
     try {
-      const response = await axios.get("http://localhost:3000/api/userdata");
-      setUserData({
-        name: response.data.userName,
-        type: response.data.userType,
-      });
+      const response = await axios.get(`${API_URL}/api/session`, { withCredentials: true });
+      return response.data.user_id;
     } catch (error) {
-      setError("Failed to fetch user data.");
-      console.error("Error fetching user data:", error);
+      console.error("Error fetching session data:", error);
+      throw error;
     }
   };
 
-  const fetchReviews = async () => {
+  // Fetch user data and reviews
+  const fetchUserDataAndReviews = async () => {
     try {
-      const sessionResponse = await axios.get("http://localhost:3000/api/session");
-      const userId = sessionResponse.data.user_id;
+      const userId = await fetchSessionData();
+      const [userDataResponse, reviewResponse] = await Promise.all([
+        axios.get(`${API_URL}/api/userdata`, { withCredentials: true }),
+        axios.get(`${API_URL}/api/myreviewfetch?user_id=${userId}`, { withCredentials: true }),
+      ]);
 
-      if (userId) {
-        const reviewResponse = await axios.get(
-          `http://localhost:3000/api/myreviewfetch?user_id=${userId}`
-        );
+      setUserData({
+        name: userDataResponse.data.userName,
+        type: userDataResponse.data.userType,
+      });
 
-        const mappedReviews = reviewResponse.data.map((review) => ({
-          id: review.id, // 각 리뷰의 고유 ID
+      setReviews(
+        reviewResponse.data.map((review) => ({
+          id: review.id,
           successRate: review.success_rate,
           strengths: review.achievement,
           improvements: review.improvement,
-        }));
-
-        setReviews(mappedReviews);
-      }
+        }))
+      );
     } catch (error) {
-      setError("Failed to fetch reviews.");
-      console.error("Error fetching reviews:", error);
+      setError("Failed to load data.");
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchUserDataAndReviews();
+  }, []);
+
+  // Navigate to the type-specific page
   const handleTypeClick = () => {
     const path = typePageMap[userData.type];
     if (path) {
       navigate(path);
     } else {
-      alert(userData.type ? "알 수 없는 타입입니다." : "유저 타입 정보가 없습니다.");
+      alert(userData.type ? "Unknown type." : "No user type assigned.");
     }
   };
 
-  const deleteReview = async (index) => {
+  // Delete a review
+  const deleteReview = async (reviewId) => {
     try {
-        // 사용자 세션에서 user_id 가져오기
-        const sessionResponse = await axios.get("http://localhost:3000/api/session");
-        const userId = sessionResponse.data.user_id;
+      const userId = await fetchSessionData();
+      await axios.delete(`${API_URL}/api/deletereview`, {
+        withCredentials: true,
+        data: { index: reviewId, user_id: userId },
+      });
 
-        console.log("Delete request with user_id:", userId, "index:", index);
-
-        // 백엔드로 삭제 요청 보내기
-        await axios.delete("http://localhost:3000/api/deletereview", {
-            data: { index, user_id: userId },
-        });
-
-        // 상태에서 해당 리뷰 제거
-        setReviews((prevReviews) =>
-            prevReviews.filter((_, reviewIndex) => reviewIndex !== index)
-        );
-
-        alert("Review deleted successfully.");
+      setReviews((prevReviews) => prevReviews.filter((review) => review.id !== reviewId));
+      alert("Review deleted successfully.");
     } catch (error) {
-        console.error("Error deleting review:", error);
-        alert("Failed to delete the review. Please try again.");
+      console.error("Error deleting review:", error);
+      alert("Failed to delete the review. Please try again.");
     }
-};
+  };
 
   return (
     <Wrap>

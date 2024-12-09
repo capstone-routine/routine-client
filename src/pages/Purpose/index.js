@@ -1,11 +1,12 @@
-// index.js
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { secondaryColor } from "../../styles/colors";
 import Content from "./ContentComponent";
 import SideContent from "./SideContentComponent";
+
+// Use environment variable for API base URL
+const API_URL = process.env.REACT_APP_API_URL;
 
 function Purpose() {
   const navigate = useNavigate();
@@ -16,12 +17,11 @@ function Purpose() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/api/session") // 세션 확인 API
+      .get(`${API_URL}/api/session`, { withCredentials: true }) // Use environment variable
       .then((response) => {
         if (response.data.user_id) {
-          // 로그인된 상태: 데이터 로드
           axios
-            .get(`http://localhost:3000/api/purposefetch?user_id=${response.data.user_id}`)
+            .get(`${API_URL}/api/purposefetch?user_id=${response.data.user_id}`, { withCredentials: true }) // Use environment variable
             .then((res) => {
               setContentData({
                 mainGoal: res.data.mainGoals || ["", "", ""],
@@ -30,7 +30,6 @@ function Purpose() {
             })
             .catch((err) => console.error("데이터 로드 오류:", err));
         } else {
-          // 로그인되지 않은 상태: 빈 값 유지
           setContentData({
             mainGoal: ["", "", ""],
             achievedList: ["", "", ""],
@@ -47,16 +46,17 @@ function Purpose() {
   }, []);
 
   const handleEdit = () => {
-    navigate("/purpose/input"); // Navigate to input page
+    navigate("/purpose/input");
   };
 
   const handleDelete = (index) => {
-    axios.get("http://localhost:3000/api/session")
+    axios
+      .get(`${API_URL}/api/session`, { withCredentials: true }) // Use environment variable
         .then((sessionResponse) => {
             const user_id = sessionResponse.data.user_id; // Get the logged-in user's ID
             if (!user_id) throw new Error("User not logged in");
 
-            return axios.post("http://localhost:3000/api/purposedelete", {
+            return axios.post(`${API_URL}/api/purposedelete`, {
                 user_id, 
                 selectedNumber: index + 1,
             });

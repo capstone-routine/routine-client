@@ -6,6 +6,7 @@ import { MessageList, MessageInput, TypingIndicator } from "@chatscope/chat-ui-k
 //import config from "../../apikey.js";
 
 const API_KEY = process.env.REACT_APP_API_KEY;
+const API_URL = process.env.REACT_APP_OPENAI_API_UR;
 
 function SideContent() {
 
@@ -60,7 +61,7 @@ function SideContent() {
       max_tokens: 500,
     };
 
-    await fetch("https://api.openai.com/v1/chat/completions", {
+    await fetch(`${API_URL}`, {
       method: "POST",
       headers: {
         Authorization: "Bearer " + API_KEY,

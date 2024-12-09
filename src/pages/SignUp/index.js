@@ -21,7 +21,7 @@ const SignUp = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:3000/api/addUser', {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/addUser`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userID: id, userPW: pw, userName: name }),

@@ -11,17 +11,19 @@ function PurposeInput() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const API_URL = process.env.REACT_APP_API_URL;
+  
     axios
-      .get("http://localhost:3000/api/session")
+      .get(`${API_URL}/api/session`, { withCredentials: true })
       .then((sessionResponse) => {
         const user_id = sessionResponse.data.user_id;
-
+  
         if (user_id) {
           axios
-            .get(`http://localhost:3000/api/purposefetch?user_id=${user_id}`)
+            .get(`${API_URL}/api/purposefetch?user_id=${user_id}`, { withCredentials: true })
             .then((response) => {
               const fetchedData = response.data;
-
+  
               setFormData({
                 mainGoal: fetchedData.mainGoals[selectedNumber - 1] || "",
                 achievedList: fetchedData.achievedLists[selectedNumber - 1] || "",
@@ -51,16 +53,18 @@ function PurposeInput() {
   };
 
   const handleSubmit = () => {
+    const API_URL = process.env.REACT_APP_API_URL;
+  
     const apiPayload = {
       selectedNumber: selectedNumber,
       mainGoal: formData.mainGoal,
       achievedList: formData.achievedList,
     };
-
+  
     console.log("API Payload:", apiPayload);
-
+  
     axios
-      .post("http://localhost:3000/api/purposeupdate", apiPayload)
+      .post(`${API_URL}/api/purposeupdate`, apiPayload, { withCredentials: true })
       .then((response) => {
         alert(response.data.message);
         navigate("/purpose");

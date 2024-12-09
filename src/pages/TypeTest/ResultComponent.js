@@ -7,7 +7,6 @@ import spontaneousImage from '../../assets/img/Spontaneous.png';
 import socialImage from '../../assets/img/Social.png';
 import emotionalImage from '../../assets/img/Emotional.png';
 import goalOrientedImage from '../../assets/img/GoalOriented.png';
-import { fontText } from '../../styles/GlobalStyle.js';
 
 const typeImages = {
   "Balanced Type": balancedImage,

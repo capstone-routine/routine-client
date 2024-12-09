@@ -7,286 +7,276 @@ function Routine() {
   const [tasks, setTasks] = useState(Array(10).fill(null)); // Maximum of 10 tasks
   const [inputValue, setInputValue] = useState("");
   const [selectedType, setSelectedType] = useState("1"); // Default: Fixed Schedule
-  const [contentData, setContentData] = useState({ mainGoal: ["", "", ""], achievedList: ["", "", ""] });  
+  const [contentData, setContentData] = useState({ mainGoal: ["", "", ""], achievedList: ["", "", ""] });
+
+  const apiUrl = process.env.REACT_APP_API_URL; // Use API URL from .env
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/api/session") // 세션 확인 API
+      .get(`${apiUrl}/api/session`, { withCredentials: true }) // Session check API
       .then((response) => {
         if (response.data.user_id) {
-          // 로그인된 상태: 데이터 로드
+          // Logged in: Load data
           axios
-            .get(`http://localhost:3000/api/purposefetch?user_id=${response.data.user_id}`)
+            .get(`${apiUrl}/api/purposefetch?user_id=${response.data.user_id}`, { withCredentials: true })
             .then((res) => {
               setContentData({
                 mainGoal: res.data.mainGoals || ["", "", ""],
               });
             })
-            .catch((err) => console.error("데이터 로드 오류:", err));
-  
-          // 루틴 정보 가져오기
+            .catch((err) => console.error("Data load error:", err));
+
+          // Fetch routine data
           axios
-            .get(`http://localhost:3000/api/routinefetch?user_id=${response.data.user_id}`)
+            .get(`${apiUrl}/api/routinefetch?user_id=${response.data.user_id}`, { withCredentials: true })
             .then((res) => {
               const fetchedTasks = res.data.tasks || [];
               const mappedTasks = fetchedTasks.map((task) => ({
                 ...task,
-                completed: task.is_completed === 1, // 서버의 is_completed 값을 completed로 매핑
+                completed: task.is_completed === 1, // Map server's is_completed to completed
               }));
               const paddedTasks = [...mappedTasks, ...Array(10 - fetchedTasks.length).fill(null)];
-              setTasks(paddedTasks.slice(0, 10)); // 항상 10개 유지
+              setTasks(paddedTasks.slice(0, 10)); // Always keep 10 tasks
             })
             .catch((err) => {
               console.error("Routine fetch failed:", err.response?.data || err.message);
             });
         } else {
-          // 로그인되지 않은 상태: 빈 값 유지
+          // Not logged in: Keep values empty
           setContentData({
             mainGoal: ["", "", ""],
           });
         }
       })
       .catch((error) => {
-        console.error("세션 확인 오류:", error);
+        console.error("Session check error:", error);
         setContentData({
           mainGoal: ["", "", ""],
         });
       });
   }, []);
   
-// Task addition
-const handleAddTask = (e) => {
-  if (e.key === "Enter" && inputValue.trim() !== "") {
-    const emptyIndex = tasks.findIndex((task) => task === null);
-    console.log("클릭된 emptyIndex:", emptyIndex); // 디버깅용
-    if (emptyIndex !== -1) {
-      axios.get("http://localhost:3000/api/session") // 세션 확인 API 호출
-        .then((response) => {
-          if (response.data.user_id) {
-            const userId = response.data.user_id; // 세션에서 가져온 user_id
-            const newTask = {
-              id: emptyIndex, // 빈 index를 id로 설정
-              user_id: userId,
-              type: selectedType,
-              content: selectedType === "4" ? `${inputValue} ${"-".repeat(15)}` : inputValue,
-              is_completed: false,
-            };
-            console.log("생성된 newTask:", newTask); // 디버깅용
+  // Task addition
+  const handleAddTask = (e) => {
+    if (e.key === "Enter" && inputValue.trim() !== "") {
+      const emptyIndex = tasks.findIndex((task) => task === null);
+      console.log("Clicked emptyIndex:", emptyIndex); // Debugging
+      if (emptyIndex !== -1) {
+        axios.get(`${apiUrl}/api/session`, { withCredentials: true }) // Session check API
+          .then((response) => {
+            if (response.data.user_id) {
+              const userId = response.data.user_id;
+              const newTask = {
+                id: emptyIndex, // Set empty index as id
+                user_id: userId,
+                type: selectedType,
+                content: selectedType === "4" ? `${inputValue} ${"-".repeat(15)}` : inputValue,
+                is_completed: false,
+              };
+              console.log("Created newTask:", newTask); // Debugging
 
-            const updatedTasks = [...tasks];
-            updatedTasks[emptyIndex] = newTask;
-            setTasks(updatedTasks);
-            setInputValue("");
+              const updatedTasks = [...tasks];
+              updatedTasks[emptyIndex] = newTask;
+              setTasks(updatedTasks);
+              setInputValue("");
 
-            // 서버에 저장
-            axios.post("http://localhost:3000/api/routinesave", newTask)
-              .then((res) => console.log("저장 성공:", res.data))
-              .catch((err) => console.error("Error saving task:", err));
-          } else {
-            alert("로그인이 필요합니다.");
-          }
-        })
-        .catch((err) => console.error("세션 확인 오류:", err));
-    } else {
-      alert("최대 10개의 일정만 추가할 수 있습니다.");
-    }
-  }
-};
-
-
-const toggleTask = (index) => {
-  const taskToToggle = tasks[index];
-
-  if (!taskToToggle) {
-    console.error("Task is undefined at index:", index);
-    return;
-  }
-
-  // is_completed 상태를 토글
-  taskToToggle.completed = !taskToToggle.completed;
-  setTasks([...tasks]);
-
-  // id 값을 명시적으로 처리
-  const taskId = taskToToggle.id;
-
-  if (taskId === undefined || taskId === null) {
-    console.error("Task ID is missing or invalid:", taskToToggle);
-    return;
-  }
-
-  axios
-    .get("http://localhost:3000/api/session")
-    .then((response) => {
-      const userId = response.data.user_id;
-
-      if (!userId) {
-        alert("로그인이 필요합니다.");
-        return;
+              // Save task to server
+              axios.post(`${apiUrl}/api/routinesave`, newTask, { withCredentials: true })
+                .then((res) => console.log("Save success:", res.data))
+                .catch((err) => console.error("Error saving task:", err));
+            } else {
+              alert("Login required.");
+            }
+          })
+          .catch((err) => console.error("Session check error:", err));
+      } else {
+        alert("You can only add up to 10 tasks.");
       }
+    }
+  };
 
-      const payload = {
-        id: taskId, // 0일 경우에도 전달됨
-        user_id: userId,
-        is_completed: taskToToggle.completed,
-      };
+  const toggleTask = (index) => {
+    const taskToToggle = tasks[index];
 
-      console.log("Payload sent to server:", payload);
+    if (!taskToToggle) {
+      console.error("Task is undefined at index:", index);
+      return;
+    }
 
-      axios
-        .put("http://localhost:3000/api/routinetoggle", payload)
-        .then((res) => {
-          console.log("Task toggled successfully:", res.data);
-        })
-        .catch((err) => {
-          console.error("Error updating task:", err.response?.data || err.message);
-          // 에러 발생 시 상태 복구
-          taskToToggle.completed = !taskToToggle.completed;
-          setTasks([...tasks]);
-        });
-    })
-    .catch((err) => {
-      console.error("세션 확인 오류:", err);
-    });
-};
+    taskToToggle.completed = !taskToToggle.completed;
+    setTasks([...tasks]);
 
-  // Delete tasks
+    const taskId = taskToToggle.id;
+
+    if (taskId === undefined || taskId === null) {
+      console.error("Task ID is missing or invalid:", taskToToggle);
+      return;
+    }
+
+    axios
+      .get(`${apiUrl}/api/session`, { withCredentials: true })
+      .then((response) => {
+        const userId = response.data.user_id;
+
+        if (!userId) {
+          alert("Login required.");
+          return;
+        }
+
+        const payload = {
+          id: taskId,
+          user_id: userId,
+          is_completed: taskToToggle.completed,
+        };
+
+        console.log("Payload sent to server:", payload);
+
+        axios
+          .put(`${apiUrl}/api/routinetoggle`, payload, { withCredentials: true })
+          .then((res) => {
+            console.log("Task toggled successfully:", res.data);
+          })
+          .catch((err) => {
+            console.error("Error updating task:", err.response?.data || err.message);
+            taskToToggle.completed = !taskToToggle.completed; // Revert if error occurs
+            setTasks([...tasks]);
+          });
+      })
+      .catch((err) => {
+        console.error("Session check error:", err);
+      });
+  };
+
+  // Task deletion
   const deleteTask = (index) => {
     const taskToDelete = tasks[index];
     if (!taskToDelete) {
       console.error("Task is undefined at index:", index);
       return;
     }
-  
-    axios.get("http://localhost:3000/api/session") // 세션 확인 API 호출
+
+    axios.get(`${apiUrl}/api/session`, { withCredentials: true })
       .then((response) => {
         const userId = response.data.user_id;
         if (userId) {
-          console.log("삭제하려는 유저:", userId);
-          console.log("삭제하려는 task ID:", taskToDelete.id);
-  
-          axios.delete("http://localhost:3000/api/routinedelete", {
+          console.log("User deleting task:", userId);
+          console.log("Task ID to delete:", taskToDelete.id);
+
+          axios.delete(`${apiUrl}/api/routinedelete`, {
             data: { id: taskToDelete.id, user_id: userId },
+            withCredentials: true
           })
           .then((res) => {
             console.log("Task deleted:", res.data);
             const updatedTasks = [...tasks];
-            updatedTasks[index] = null; // 삭제 후 프론트엔드에서 제거
+            updatedTasks[index] = null;
             setTasks(updatedTasks);
           })
           .catch((err) => console.error("Error deleting task:", err));
         } else {
-          alert("로그인이 필요합니다.");
+          alert("Login required.");
         }
       })
-      .catch((err) => console.error("세션 확인 오류:", err));
+      .catch((err) => console.error("Session check error:", err));
   };
-  
 
-// Calculate and send success rate to the server
-const submitSuccessRate = async () => {
-  try {
-    const sessionResponse = await axios.get("http://localhost:3000/api/session");
-    const userId = sessionResponse.data.user_id;
+  const submitSuccessRate = async () => {
+    try {
+      const sessionResponse = await axios.get(`${apiUrl}/api/session`, { withCredentials: true });
+      const userId = sessionResponse.data.user_id;
 
-    if (!userId) {
-      alert("로그인이 필요합니다.");
-      return;
-    }
-
-    const routineResponse = await axios.get(`http://localhost:3000/api/routinefetch?user_id=${userId}`);
-    const tasks = routineResponse.data.tasks || [];
-
-    // 필터링 조건 수정
-    const mainTasks = tasks.filter((task) => task.type === "main일정");
-    const completedTasks = mainTasks.filter((task) => task.is_completed == 1);
-
-    const successRate = mainTasks.length > 0
-      ? Math.round((completedTasks.length / mainTasks.length) * 100)
-      : 100;
-
-    console.log("Total main tasks:", mainTasks.length);
-    console.log("Completed tasks:", completedTasks.length);
-    console.log("Calculated success rate:", successRate);
-
-    await axios.post("http://localhost:3000/api/routinesubmit", {
-      user_id: userId,
-      success_rate: successRate,
-    });
-
-    alert(`성공률이 저장되었습니다. (${successRate}%) has been saved!`);
-    window.location.href = "/routine/review";
-  } catch (error) {
-    console.error("Error submitting success rate:", error);
-    alert("서버 오류가 발생했습니다.");
-  }
-};
-
-
-
-
-
-// Reset 버튼 클릭 핸들러
-const handleReset = () => {
-  axios
-    .get("http://localhost:3000/api/session") // 세션 확인 API
-    .then((response) => {
-      if (response.data.user_id) {
-        const userId = response.data.user_id; // 세션에서 가져온 user_id
-
-        // Reset API 호출
-        axios
-          .delete("http://localhost:3000/api/routinereset", {
-            data: { user_id: userId }, // user_id를 요청에 포함
-          })
-          .then(() => {
-            setTasks(Array(10).fill(null)); // 화면 상태 초기화
-            console.log("모든 루틴 삭제 성공");
-            alert("루틴이 초기화되었습니다.");
-          })
-          .catch((err) => {
-            console.error("루틴 초기화 실패:", err);
-            alert("루틴 초기화 중 오류가 발생했습니다.");
-          });
-      } else {
-        alert("로그인이 필요합니다.");
+      if (!userId) {
+        alert("Login required.");
+        return;
       }
-    })
-    .catch((err) => {
-      console.error("세션 확인 오류:", err);
-      alert("세션 확인 중 오류가 발생했습니다.");
-    });
-};
 
-const typeMapping = {
-  고정일정: "1",
-  main일정: "2",
-  여유시간: "3",
-  시간: "4",
-};
+      const routineResponse = await axios.get(`${apiUrl}/api/routinefetch?user_id=${userId}`, { withCredentials: true });
+      const tasks = routineResponse.data.tasks || [];
 
-// Task 배경색을 결정하는 함수
-const getTaskColor = (type, completed) => {
-  const mappedType = typeMapping[type] || type;
+      const mainTasks = tasks.filter((task) => task.type === "main일정");
+      const completedTasks = mainTasks.filter((task) => task.is_completed == 1);
 
-  if (type === "1") return "#e0e0e0"; // Fixed Schedule
-  if (type === "3") return tertiaryColor; // Leisure Time
-  if (type === "4") return "#ffffff"; // Time
-  if (type === "2") {
-    // Main 일정의 색상 변경 로직
-    return completed ? primaryColor : "#ffffff"; 
-  }
-  return "#ffffff"; // Default color
-};
+      const successRate = mainTasks.length > 0
+        ? Math.round((completedTasks.length / mainTasks.length) * 100)
+        : 100;
 
+      console.log("Total main tasks:", mainTasks.length);
+      console.log("Completed tasks:", completedTasks.length);
+      console.log("Calculated success rate:", successRate);
 
-// Determine text color for each task type and state
-const getTextColor = (type, completed) => {
-  const mappedType = typeMapping[type] || type;
-  if (type === "1" || type === "3") return "#ffffff"; // Fixed Schedule & Leisure Time (white text)
-  if (type === "4") return "#555555"; // Time (gray text)
-  if (type === "2") return completed ? "#ffffff" : primaryColor; // Main (toggle)
-  return "#000000"; // Default black
-};
+      await axios.post(`${apiUrl}/api/routinesubmit`, {
+        user_id: userId,
+        success_rate: successRate,
+      }, { withCredentials: true });
+
+      alert(`Success rate saved! (${successRate}%)`);
+      window.location.href = "/routine/review";
+    } catch (error) {
+      console.error("Error submitting success rate:", error);
+      alert("Server error occurred.");
+    }
+  };
+
+  // Reset tasks
+  const handleReset = () => {
+    axios
+      .get(`${apiUrl}/api/session`, { withCredentials: true })
+      .then((response) => {
+        if (response.data.user_id) {
+          const userId = response.data.user_id;
+
+          axios
+            .delete(`${apiUrl}/api/routinereset`, {
+              data: { user_id: userId },
+              withCredentials: true
+            })
+            .then(() => {
+              setTasks(Array(10).fill(null));
+              console.log("All routines reset");
+              alert("Routines have been reset.");
+            })
+            .catch((err) => {
+              console.error("Routine reset failed:", err);
+              alert("Error during routine reset.");
+            });
+        } else {
+          alert("Login required.");
+        }
+      })
+      .catch((err) => {
+        console.error("Session check error:", err);
+        alert("Error during session check.");
+      });
+  };
+
+  const typeMapping = {
+    고정일정: "1",
+    main일정: "2",
+    여유시간: "3",
+    시간: "4",
+  };
+
+  // Task background color logic
+  const getTaskColor = (type, completed) => {
+    const mappedType = typeMapping[type] || type;
+
+    if (type === "1") return "#e0e0e0"; // Fixed Schedule
+    if (type === "3") return tertiaryColor; // Leisure Time
+    if (type === "4") return "#ffffff"; // Time
+    if (type === "2") {
+      return completed ? primaryColor : "#ffffff"; // Main Schedule color
+    }
+    return "#ffffff"; // Default color
+  };
+
+  // Determine text color for each task type and state
+  const getTextColor = (type, completed) => {
+    const mappedType = typeMapping[type] || type;
+    if (type === "1" || type === "3") return "#ffffff"; // Fixed Schedule & Leisure Time (white text)
+    if (type === "4") return "#555555"; // Time (gray text)
+    if (type === "2") return completed ? "#ffffff" : primaryColor; // Main (toggle)
+    return "#000000"; // Default black
+  };
 
 return (
   <Container>

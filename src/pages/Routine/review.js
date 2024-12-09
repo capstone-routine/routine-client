@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"; // Import useEffect
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import axios from "axios";
 import { primaryColor } from "../../styles/colors";
@@ -12,17 +12,17 @@ function Review({ successRate }) {
   const [localSuccessRate, setLocalSuccessRate] = useState(0);
   const [userId, setUserId] = useState(null);
 
-  // 세션에서 user_id 가져오고 review 데이터 로드
+  // Fetch session data and review data
   useEffect(() => {
     axios
-      .get("http://localhost:3000/api/session")
+      .get(`${process.env.REACT_APP_API_URL}/api/session`, { withCredentials: true })
       .then((response) => {
         const userId = response.data.user_id;
         setUserId(userId);
   
         if (userId) {
           axios
-            .get(`http://localhost:3000/api/reviewfetch?user_id=${userId}`)
+            .get(`${process.env.REACT_APP_API_URL}/api/reviewfetch?user_id=${userId}`, { withCredentials: true })
             .then((res) => {
               console.log("Fetched latest review data:", res.data);
               const { success_rate, achievement, improvement } = res.data;
@@ -37,15 +37,14 @@ function Review({ successRate }) {
       })
       .catch((err) => console.error("Error fetching session data:", err));
   }, []);
-  
 
   const handleSubmit = () => {
     axios
-      .post("http://localhost:3000/api/reviewinput", {
+      .post(`${process.env.REACT_APP_API_URL}/api/reviewinput`, {
         user_id: userId,
         strengths: feedback.strengths,
         improvements: feedback.improvements,
-      })
+      }, { withCredentials: true })
       .then((res) => {
         console.log("Review updated successfully:", res.data);
         alert("Review updated successfully!");
@@ -55,8 +54,6 @@ function Review({ successRate }) {
         alert("Error updating review. Check console for details.");
       });
   };
-  
-  
 
   return (
     <Wrap>
@@ -93,6 +90,7 @@ function Review({ successRate }) {
 }
 
 export default Review;
+
 
 
 // Styled Components

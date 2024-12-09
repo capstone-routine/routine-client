@@ -16,28 +16,29 @@ const SignIn = () => {
         e.preventDefault();
     
         try {
-            const response = await fetch('http://localhost:3000/api/Login', {
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/Login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ userID: id, userPW: pw }),
+                credentials: 'include', // This ensures cookies are included in the request
             });
     
             if (!response.ok) {
                 const result = await response.json();
-                alert(result.message); // 오류 메시지 표시
+                alert(result.message); // Show error message
                 setId('');
                 setPw('');
                 return;
             }
     
             const result = await response.json();
-            alert(result.message); // 로그인 성공 메시지
-            navigate('/'); // 메인 화면으로 이동
+            alert(result.message); // Show success message
+            navigate('/'); // Navigate to the home page
         } catch (error) {
-            console.error('요청 중 오류 발생:', error);
-            alert('로그인 요청 중 문제가 발생했습니다.');
+            console.error('Error during the request:', error);
+            alert('An error occurred while processing your login request.');
             setId('');
             setPw('');
         }
