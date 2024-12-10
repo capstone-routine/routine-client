@@ -102,8 +102,10 @@ function MyPage() {
         data: { index: reviewId, user_id: userId },
       });
 
-      setReviews((prevReviews) => prevReviews.filter((review) => review.id !== reviewId));
-      alert("Review deleted successfully.");
+      // 리뷰 삭제 후 최신 데이터 재요청
+    await fetchUserDataAndReviews();
+    
+    alert("Review deleted successfully.");
     } catch (error) {
       console.error("Error deleting review:", error);
       alert("Failed to delete the review. Please try again.");
