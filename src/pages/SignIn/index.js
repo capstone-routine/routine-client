@@ -7,6 +7,8 @@ import { textColor, secondaryColor, tertiaryColor } from "../../styles/colors";
 import { MdEmail } from "react-icons/md";
 import { FaKey } from "react-icons/fa";
 
+const API_URL = process.env.REACT_APP_API_URL;
+
 const SignIn = () => {
     const [id, setId] = useState('');
     const [pw, setPw] = useState('');
@@ -16,7 +18,7 @@ const SignIn = () => {
         e.preventDefault();
     
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/Login`, {
+            const response = await fetch(`${API_URL}/api/Login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

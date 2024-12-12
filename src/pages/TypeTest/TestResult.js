@@ -11,7 +11,7 @@ import emotionalImage from '../../assets/img/Emotional.png';
 import goalOrientedImage from '../../assets/img/GoalOriented.png';
 import backgroundImage from "../../assets/img/testBackground.png";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL;
+const API_URL = process.env.REACT_APP_API_URL;
 
 function TestResult() {
     const [results, setResults] = useState({});
@@ -31,7 +31,7 @@ function TestResult() {
             setHighestType(determinedType);
 
             // Send the result to backend
-            axios.post(`${API_BASE_URL}/Usertype`, { type: determinedType }, { withCredentials: true })
+            axios.post(`${API_URL}/Usertype`, { type: determinedType }, { withCredentials: true })
                 .then(response => console.log('Results saved:', response.data))
                 .catch(error => console.error('Error saving results:', error));
         }
